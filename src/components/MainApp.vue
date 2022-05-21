@@ -1,51 +1,69 @@
 <template>
-  <div class="container">
-    <h3>Custom date component</h3>
-    <div class="date_properties">
-      <div class="pure-g">
-        <label for="format" class="pure-u-1-6">Date Format</label>
-        <select id="format" v-model="format" class="pure-u-1-3">
-          <option value="EU" selected>DD-MM-YYYY</option>
-          <option value="US">MM-DD-YYYY</option>
-          <option value="ISO">YYYY-MM-DD</option>
-        </select>
-      </div>
-      <div class="pure-g">
-        <label for="separator" class="pure-u-1-6">Separator</label>
-        <select id="separator" v-model="separator" class="pure-u-1-3">
-          <option value="-" selected>-</option>
-          <option value="/">/</option>
-          <option value=".">.</option>
-          <option value=" "></option>
-        </select>
-      </div>
-      <div class="pure-g">
+  <v-container>
+    <v-row class="text-center">
+      <v-col cols="12">
+        <h3>Test custom date component</h3>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="6">
+        <v-select id="format" :items="formatItems" item-text="format" item-value="code" label="Select format" v-model="format" class="pure-u-1-3">
+        </v-select>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="6">
+        <v-select id="separator" label="Separator" v-model="separator" :items="seperatorItems">
+        </v-select>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="6">
+        <v-checkbox v-model="required" label="Required?"></v-checkbox>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="6">
+        <v-range-slider
+            v-model="dateRange"
+            min="1800"
+            max="2200"
+            step="10"
+            label="Select date range"
+            :hint="hintRange"
+        ></v-range-slider>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <p-date-input
+            v-model="date"
+            @log="logMessage"
+            @error="reportError"
+            :required="required"
+            :min-year="minYear"
+            :max-year="maxYear"
+            :format="format"
+            :separator="separator"
+        />
+      </v-col>
+      <v-col>
+        <p>Entered valid date: {{ date }}</p>
+        <p>Error {{ errorDescription }}</p>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <button @click="messages = []">Clear</button>
+      </v-col>
+    </v-row>
 
-        <label for="required" class="pure-u-1-6">Required</label>
-        <input type="checkbox" v-model="required" class="pure-u-1-3">
-      </div>
-      <div class="pure-g">
-        <label class="pure-u-1-6">Range</label>
-        <div class="pure-u-5-6 range"><input type="number" v-model="minYear"> - <input type="number" v-model="maxYear"></div>
-      </div>
-    </div>
-    <p-date-input
-        v-model="date"
-        @log="logMessage"
-        @error="reportError"
-        :required="required"
-        :min-year="minYear"
-        :max-year="maxYear"
-        :format="format"
-        :separator="separator"
-    />
-    <p>Entered valid date: {{ date }}</p>
-    <p>Error {{ errorDescription }}</p>
-    <p class="log">
-      <button @click="messages = []">Clear</button>
-      <span v-for="msg, idx in messages" :key="idx">{{ idx }} {{ msg }}<br></span>
-    </p>
-  </div>
+    <v-row class="log">
+      <v-col>
+        <span v-for="msg, idx in messages" :key="idx">{{ idx }} {{ msg }}<br></span>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -65,6 +83,16 @@ export default class MainApp extends Vue {
   errorDescription = ""
   messages: Array<string> = []
 
+  readonly formatItems = [
+    { code: 'EU',  format: 'DD-MM-YYYY' },
+    { code: 'US',  format: 'MM-DD-YYYY' },
+    { code: 'ISO', format: 'YYYY-MM-DD' }
+  ]
+
+  readonly seperatorItems =  ['-', '/', '.']
+
+  readonly dateRange = [1900, 2000]
+
   minYear = 1900
   maxYear = 2100
   required = false
@@ -74,6 +102,16 @@ export default class MainApp extends Vue {
   @Watch("date")
   watchDate(isoDate: string): void {
     this.errorDescription = ""
+  }
+
+  @Watch("dateRange")
+  watchDateRange(newValue: number[]): void {
+    this.minYear = newValue[0]
+    this.maxYear = newValue[1]
+  }
+
+  get hintRange() {
+    return ` min ${this.dateRange[0]} - max ${this.dateRange[1]}`
   }
 
   logMessage(msg: string): void {
@@ -90,7 +128,7 @@ export default class MainApp extends Vue {
 <style scoped>
 
 .container {
-  width: 40%;
+  width: 80%;
   margin: auto;
 }
 

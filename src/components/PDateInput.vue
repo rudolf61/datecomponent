@@ -1,17 +1,20 @@
 <template>
   <div class="__pdate_input">
     <input
+        id="i"
         size="2"
         maxlength="2"
         ref="day"
         v-model="dayInput"
-        class="__pdate_input__input __pdate_input__input--day"
+        class="__pdate_input__input __pdate_input__input--day mat-input"
         type="tel"
         placeholder="dd"
         @keydown="keydownDay"
         @input="nextElement"
         @blur="blurDay"
         @focus="focusDate"
+        @focusin="focusIn"
+        @focusout="focusOut"
     />
     <span ref="sep1" class="__pdate_input__divider">{{ separator }}</span>
     <input
@@ -19,13 +22,15 @@
         size="2"
         maxlength="2"
         v-model="monthInput"
-        class="__pdate_input__input __pdate_input__input--month"
+        class="__pdate_input__input __pdate_input__input--month mat-input"
         type="tel"
         placeholder="mm"
         @keydown="keydownMonth"
         @input="nextElement"
         @blur="blurMonth"
         @focus="focusDate"
+        @focusin="focusIn"
+        @focusout="focusOut"
     />
     <span ref="sep2" class="__pdate_input__divider">{{ separator }}</span>
     <input
@@ -33,15 +38,17 @@
         size="4"
         maxlength="4"
         v-model="yearInput"
-        class="__pdate_input__input __pdate_input__input--year"
+        class="__pdate_input__input __pdate_input__input--year mat-input"
         type="tel"
         placeholder="yyyy"
         @keydown="keydownYear"
         @input="nextElement"
         @blur="blurYear"
         @focus="focusDate"
+        @focusin="focusIn"
+        @focusout="focusOut"
     />
-    <a v-if="clearable" ref="clear" href="#" class="clear" @click="clearDate"> &#10007;</a>
+    <a v-if="clearable" ref="clear" class="clear" @click="clearDate"> &#10007;</a>
   </div>
 </template>
 <script lang="ts">
@@ -136,6 +143,14 @@ export default class PDateInput extends Vue {
 
   focusDate(): void {
     this.inDate = true
+  }
+
+  focusIn(input: HTMLInputElement): void {
+    input.parentElement?.classList.add('is-active', 'is-completed')
+  }
+
+  focusOut(input: HTMLInputElement): void {
+    input.parentElement?.classList.remove('is-active', 'is-completed')
   }
 
   get day(): number | undefined {
@@ -381,6 +396,15 @@ export default class PDateInput extends Vue {
 
     }
 
+
+    if (!this.yearInput) {
+      this.raiseError({
+        element: DateElement.DATE,
+        error: "error.date.invalid",
+      });
+      return;
+    }
+
     const dateISO = `${(this.yearInput ?? "").padStart(4, "0")}-${this.monthInput ?? ""}-${this.dayInput ?? ""}`;
     const timestamp = Date.parse(dateISO);
 
@@ -503,11 +527,12 @@ export default class PDateInput extends Vue {
       ].includes(code);
 }
 </script>
+
 <style scoped>
 .__pdate_input {
-  display: inline-block ;
+  display: inline-block;
   padding: 1px;
-  width: 8.1rem;
+  width: 9rem;
   border: 1px gray solid;
   border-radius: 4px;
 }
@@ -515,7 +540,7 @@ export default class PDateInput extends Vue {
 input, span, .clear {
   display: inline-block;
   float: left;
-  //text-align: center;
+//text-align: center;
 }
 
 input {
@@ -534,12 +559,18 @@ input:first-child {
 }
 
 input:nth-of-type(2) {
-  width: 1.3rem;
+  width: 1.7rem;
 }
 
-span {
+span:first-child {
   width: 0.3rem;
   text-align: center;
+}
+
+span:nth-of-type(2) {
+  width: 0.3rem;
+  text-align: center;
+  margin-left: 0.4rem;
 }
 
 .clear {
