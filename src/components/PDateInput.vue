@@ -1,5 +1,5 @@
 <template>
-  <div class="__pdate_input" :class="{ __pdateinput_error : showInError }">
+  <div class="__pdate_input" :class="{ __pdateinput_error : showError }">
     <div class="datewrapper">
       <input
           size="2"
@@ -70,6 +70,7 @@ export default class PDateInput extends Vue {
   private dayInput = "";
   private monthInput = "";
   private yearInput = "";
+  private showError = false;
 
   mounted(): void {
     this.reorderFields(this.format)
@@ -109,6 +110,11 @@ export default class PDateInput extends Vue {
       parent?.append(sep2);
       parent?.append(dayInputElm);
     }
+  }
+
+  @Watch("showInError")
+  setErrorFlag(newVal: boolean): void {
+    this.showError = newVal
   }
 
   /*
@@ -158,18 +164,6 @@ export default class PDateInput extends Vue {
     return this.yearInput ? parseInt(this.yearInput) : undefined;
   }
 
-  caretPosition(input: HTMLInputElement): number {
-    let iCaretPos = 0;
-    if (input.selectionStart || input.selectionStart === 0) {
-      iCaretPos =
-          input.selectionDirection == "backward"
-              ? input.selectionStart
-              : input.selectionEnd ?? 0;
-    }
-
-    return iCaretPos;
-  }
-
   /*
     On keydown we don't know the value of the input when the key is released.
     This method emulates this. This enables the keydown event to validate the final value
@@ -177,7 +171,11 @@ export default class PDateInput extends Vue {
     */
   getInputValueOnKeydown(event: KeyboardEvent): string {
     const inputElement = event.currentTarget as HTMLInputElement;
-    const caretPos = this.caretPosition(inputElement);
+    const caretPos = PDateInput.caretPosition(inputElement);
+
+    if (this.showError) {
+      this.showError = false
+    }
 
     if (caretPos == inputElement.maxLength) {
       return inputElement.value;
@@ -202,17 +200,6 @@ export default class PDateInput extends Vue {
       }
     }
   }
-
-  isLeapYear = (year?: number): boolean => {
-    if (!year) {
-      return false;
-    }
-    return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
-  };
-
-  monthWith30Days = (month: number): boolean => [4, 6, 9, 11].includes(month);
-  monthWith31Days = (month: number): boolean =>
-      [1, 3, 5, 7, 8, 10, 12].includes(month);
 
   keydownDay(event: KeyboardEvent): boolean {
     this.log(`Day character code ${event.key}`);
@@ -307,10 +294,6 @@ export default class PDateInput extends Vue {
     return true;
   }
 
-  nextElement(event: KeyboardEvent): void {
-    this.focusNextElement(event.currentTarget as HTMLInputElement);
-  }
-
   updateValue(): void {
     this.log('BURP updateValue')
 
@@ -345,6 +328,18 @@ export default class PDateInput extends Vue {
 
     this.$emit(`input`, dateISO);
   }
+
+  private isLeapYear = (year?: number): boolean => {
+    if (!year) {
+      return false;
+    }
+    return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  };
+
+  private monthWith30Days = (month: number): boolean => [4, 6, 9, 11].includes(month);
+  private monthWith31Days = (month: number): boolean =>
+      [1, 3, 5, 7, 8, 10, 12].includes(month);
+
 
   private isValidDay(day?: number, month?: number, year?: number): boolean {
     if (!day) {
@@ -424,6 +419,10 @@ export default class PDateInput extends Vue {
     return this.ACCEPT_CODE(event.code) || PDateInput.isNumber(event)
   }
 
+  private nextElement(event: KeyboardEvent): void {
+    this.focusNextElement(event.currentTarget as HTMLInputElement);
+  }
+
   private nextInputElement(
       element: HTMLInputElement
   ): HTMLInputElement | undefined {
@@ -463,6 +462,18 @@ export default class PDateInput extends Vue {
       nextElement.select();
       nextElement.focus();
     }
+  }
+
+  private static caretPosition(input: HTMLInputElement): number {
+    let iCaretPos = 0;
+    if (input.selectionStart || input.selectionStart === 0) {
+      iCaretPos =
+          input.selectionDirection == "backward"
+              ? input.selectionStart
+              : input.selectionEnd ?? 0;
+    }
+
+    return iCaretPos;
   }
 
   private log(msg: string): void {
@@ -529,7 +540,7 @@ export default class PDateInput extends Vue {
 .datewrapper {
   width: 80%;
   float: left;
-  margin: 0px;
+  margin: 0;
 }
 
 input, span, .clear {
@@ -573,7 +584,7 @@ input, span, .clear {
   margin-left: 3px;
 }
 
-__pdateinput_error {
+.__pdateinput_error {
   border-color: red;
 }
 </style>

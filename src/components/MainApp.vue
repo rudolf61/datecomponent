@@ -57,6 +57,8 @@
       <v-col>
         <p>Entered valid date: {{ date }}</p>
         <p>Error {{ errorDescription }}</p>
+
+        <p>showInError {{ showInError }}</p>
       </v-col>
     </v-row>
     <v-row>
@@ -67,7 +69,7 @@
 
     <v-row class="log">
       <v-col>
-        <span v-for="msg, idx in messages" :key="idx">{{ idx }} {{ msg }}<br></span>
+        <span v-for="[msg, idx] in messages" :key="idx">{{ idx }} {{ msg }}<br></span>
       </v-col>
     </v-row>
   </v-container>
@@ -170,7 +172,7 @@ select {
 }
 
 h3 {
-  margin: 40px 0 20 pz;
+  margin: 40px 0;
 }
 
 ul {
