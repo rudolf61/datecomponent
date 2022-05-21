@@ -1,14 +1,14 @@
 export enum DateFormat {
-    EU  = "DD-MM-YYYY",
-    US  = "MM-DD-YYYY",
-    ISO = "YYYY-MM-DD",
+    EU  = "EU",
+    US  = "US",
+    ISO = "ISO",
 }
 
 export enum DateElement {
-    DD,
-    MM,
-    YY,
-    DATE
+    DD = "DD",
+    MM = "MM",
+    YY = "YY",
+    DATE = "DATE"
 }
 
 
