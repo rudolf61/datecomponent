@@ -1,12 +1,11 @@
 <template>
   <div class="__pdate_input">
     <input
-        id="i"
         size="2"
         maxlength="2"
         ref="day"
         v-model="dayInput"
-        class="__pdate_input__input __pdate_input__input--day mat-input"
+        class="__pdate_input__input __pdate_input__input--day w-day"
         type="tel"
         placeholder="dd"
         @keydown="keydownDay"
@@ -16,13 +15,13 @@
         @focusin="focusIn"
         @focusout="focusOut"
     />
-    <span ref="sep1" class="__pdate_input__divider">{{ separator }}</span>
+    <span ref="sep1" class="__pdate_input__divider span-1">{{ separator }}</span>
     <input
         ref="month"
         size="2"
         maxlength="2"
         v-model="monthInput"
-        class="__pdate_input__input __pdate_input__input--month mat-input"
+        class="__pdate_input__input __pdate_input__input--month w-month"
         type="tel"
         placeholder="mm"
         @keydown="keydownMonth"
@@ -32,13 +31,13 @@
         @focusin="focusIn"
         @focusout="focusOut"
     />
-    <span ref="sep2" class="__pdate_input__divider">{{ separator }}</span>
+    <span ref="sep2" class="__pdate_input__divider span-2">{{ separator }}</span>
     <input
         ref="year"
         size="4"
         maxlength="4"
         v-model="yearInput"
-        class="__pdate_input__input __pdate_input__input--year mat-input"
+        class="__pdate_input__input __pdate_input__input--year w-year"
         type="tel"
         placeholder="yyyy"
         @keydown="keydownYear"
@@ -529,9 +528,13 @@ export default class PDateInput extends Vue {
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
 .__pdate_input {
   display: inline-block;
-  padding: 1px;
+  padding: 0.3rem;
   width: 9rem;
   border: 1px gray solid;
   border-radius: 4px;
@@ -539,49 +542,22 @@ export default class PDateInput extends Vue {
 
 input, span, .clear {
   display: inline-block;
-  float: left;
-//text-align: center;
 }
 
-input {
-  margin-left: 5px;
-  width: 1.5rem;
-}
-
-input:nth-of-type(3) {
-  margin-left: 2px;
-  width: 2.3rem;
-}
-
-
-input:first-child {
-  padding-right: 0px;
-}
-
-input:nth-of-type(2) {
-  width: 1.7rem;
-}
-
-span:first-child {
-  width: 0.3rem;
-  text-align: center;
-}
-
-span:nth-of-type(2) {
-  width: 0.3rem;
-  text-align: center;
-  margin-left: 0.4rem;
-}
+.w-day   { width: 17%; }
+.span-1  { width: 5%; margin-right: 1px; }
+.w-month { width: 24%; }
+.span-2  { width: 5%; margin-right: 1px; }
+.w-year  { width: 30%; }
+.clear   { width: 13%; }
 
 .clear {
-  margin-top: 0.2rem;
-  margin-left: 0.2rem;
   text-decoration: none;
   text-align: center;
   font-size: 70%;
-  width: 1rem;
   border-radius: 100%;
   background-color: #9f9f9f;
   color: white;
+  margin-left: 3px;
 }
 </style>
