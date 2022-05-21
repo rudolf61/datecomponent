@@ -24,6 +24,11 @@
     </v-row>
     <v-row>
       <v-col cols="6">
+        <v-checkbox v-model="clearable" label="Clearable?"></v-checkbox>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="6">
         <v-range-slider
             v-model="dateRange"
             min="1800"
@@ -41,10 +46,12 @@
             @log="logMessage"
             @error="reportError"
             :required="required"
+            :clearable="clearable"
             :min-year="minYear"
             :max-year="maxYear"
             :format="format"
             :separator="separator"
+            :show-in-error="showInError"
         />
       </v-col>
       <v-col>
@@ -82,6 +89,7 @@ export default class MainApp extends Vue {
   date = ""
   errorDescription = ""
   messages: Array<string> = []
+  showInError = false
 
   readonly formatItems = [
     { code: 'EU',  format: 'DD-MM-YYYY' },
@@ -96,12 +104,14 @@ export default class MainApp extends Vue {
   minYear = 1900
   maxYear = 2100
   required = false
+  clearable = true
   separator = '-'
   format = 'EU'
 
   @Watch("date")
   watchDate(isoDate: string): void {
     this.errorDescription = ""
+    this.showInError = false
   }
 
   @Watch("dateRange")
@@ -119,6 +129,7 @@ export default class MainApp extends Vue {
   }
 
   reportError(error: InputError): void {
+    this.showInError = true
     this.errorDescription = `${error.element} - ${error.error}`
   }
 }
