@@ -290,7 +290,7 @@ export default class PDateInput extends Vue {
     this.log(`updateValue: dateISO equals ${dateISO}`)
     const timestamp = Date.parse(dateISO);
     const d = new Date()
-    if (Number.isNaN(timestamp)) {
+    if (Number.isNaN(timestamp) || (this.year && (this.year < this.minYear || this.year > this.maxYear))) {
       this.raiseError({
         element: DateElement.DATE,
         error: "error.date.invalid",
