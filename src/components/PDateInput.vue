@@ -160,18 +160,6 @@ export default class PDateInput extends Vue {
     input.parentElement?.classList.remove('is-active', 'is-completed')
   }
 
-  get day(): number | undefined {
-    return this.dayInput ? parseInt(this.dayInput) : undefined;
-  }
-
-  get month(): number | undefined {
-    return this.monthInput ? parseInt(this.monthInput) : undefined;
-  }
-
-  get year(): number | undefined {
-    return this.yearInput ? parseInt(this.yearInput) : undefined;
-  }
-
   keydownDay(event: KeyboardEvent): boolean {
     this.log(`Day character code ${event.key}`);
 
@@ -265,6 +253,18 @@ export default class PDateInput extends Vue {
     return true;
   }
 
+  get day(): number | undefined {
+    return this.dayInput ? parseInt(this.dayInput) : undefined;
+  }
+
+  get month(): number | undefined {
+    return this.monthInput ? parseInt(this.monthInput) : undefined;
+  }
+
+  get year(): number | undefined {
+    return this.yearInput ? parseInt(this.yearInput) : undefined;
+  }
+
   updateValue(): void {
     this.log('updateValue')
 
@@ -274,9 +274,7 @@ export default class PDateInput extends Vue {
         error: "error.date.required",
       });
       return;
-
     }
-
 
     if (!this.yearInput) {
       this.raiseError({
