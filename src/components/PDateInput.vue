@@ -13,8 +13,6 @@
           @input="nextElement"
           @blur="blurDay"
           @focus="focusDate"
-          @focusin="focusIn"
-          @focusout="focusOut"
       />
       <span ref="sep1" class="__pdate_input__divider span-1">{{ separator }}</span>
       <input
@@ -29,8 +27,6 @@
           @input="nextElement"
           @blur="blurMonth"
           @focus="focusDate"
-          @focusin="focusIn"
-          @focusout="focusOut"
       />
       <span ref="sep2" class="__pdate_input__divider span-2">{{ separator }}</span>
       <input
@@ -45,38 +41,38 @@
           @input="nextElement"
           @blur="blurYear"
           @focus="focusDate"
-          @focusin="focusIn"
-          @focusout="focusOut"
       />
     </div>
     <a v-if="clearable" ref="clear" class="clear" @click="clearDate"> &#10007;</a>
   </div>
 </template>
 <script lang="ts">
-import {Component, Prop, Vue, Watch} from "vue-property-decorator";
-import {DateElement, DateFormat, InputError} from "./type";
+import {Component, Prop, Vue, Watch} from "vue-property-decorator"
+import {DateElement, DateFormat, InputError} from "./type"
 
 @Component
 export default class PDateInput extends Vue {
-  @Prop() private value!: string;
-  @Prop({default: DateFormat.EU}) private format!: DateFormat;
-  @Prop({default: "-"}) private separator!: string;
-  @Prop({default: 1900}) private minYear!: number;
-  @Prop({default: 2100}) private maxYear!: number;
-  @Prop({default: true}) private clearable!: boolean;
-  @Prop({default: false}) private required!: boolean;
-  @Prop({default: false}) private showInError!: boolean;
-  private inDate = false
-  private dayInput = "";
-  private monthInput = "";
-  private yearInput = "";
-  private showError = false;
+  @Prop() private value!: string
+  @Prop({default: DateFormat.EU}) private format!: DateFormat
+  @Prop({default: "-"}) private separator!: string
+  @Prop({default: 1900}) private minYear!: number
+  @Prop({default: 2100}) private maxYear!: number
+  @Prop({default: true}) private clearable!: boolean
+  @Prop({default: false}) private required!: boolean
+  @Prop({default: false}) private showInError!: boolean
+  private inDate     = false
+  private dayInput   = ""
+  private monthInput = ""
+  private yearInput  = ""
+  private showError  = false
 
+  /* LIFECYCLE METHODS */
   mounted(): void {
     this.reorderFields(this.format)
     this.assignNewValue(this.value)
   }
 
+  /* EVENT HANDLERS */
   @Watch("value")
   watchValue(newValue: string)
   {
@@ -85,37 +81,38 @@ export default class PDateInput extends Vue {
 
   @Watch("format")
   reorderFields(newVal: string): void {
-    const dayInputElm = this.$refs.day as HTMLInputElement;
-    const monthInputElm = this.$refs.month as HTMLInputElement;
-    const yearInputElm = this.$refs.year as HTMLInputElement;
-    const sep1 = this.$refs.sep1 as HTMLSpanElement
-    const sep2 = this.$refs.sep2 as HTMLSpanElement
-    const parent = dayInputElm.parentElement;
+    const dayInputElm   = this.$refs.day as HTMLInputElement
+    const monthInputElm = this.$refs.month as HTMLInputElement
+    const yearInputElm  = this.$refs.year as HTMLInputElement
 
-    parent?.removeChild(dayInputElm);
-    parent?.removeChild(sep1);
-    parent?.removeChild(monthInputElm);
-    parent?.removeChild(sep2);
-    parent?.removeChild(yearInputElm);
+    const sep1   = this.$refs.sep1 as HTMLSpanElement
+    const sep2   = this.$refs.sep2 as HTMLSpanElement
+    const parent = dayInputElm.parentElement
 
-    if (newVal === "EU") {
-      parent?.append(dayInputElm);
-      parent?.append(sep1);
-      parent?.append(monthInputElm);
-      parent?.append(sep2);
-      parent?.append(yearInputElm);
-    } else if (newVal === "US") {
-      parent?.append(monthInputElm);
-      parent?.append(sep1);
-      parent?.append(dayInputElm);
-      parent?.append(sep2);
-      parent?.append(yearInputElm);
-    } else if (newVal === "ISO") {
-      parent?.append(yearInputElm);
-      parent?.append(sep1);
-      parent?.append(monthInputElm);
-      parent?.append(sep2);
-      parent?.append(dayInputElm);
+    parent?.removeChild(dayInputElm)
+    parent?.removeChild(sep1)
+    parent?.removeChild(monthInputElm)
+    parent?.removeChild(sep2)
+    parent?.removeChild(yearInputElm)
+
+    if (newVal === DateFormat.EU) {
+      parent?.append(dayInputElm)
+      parent?.append(sep1)
+      parent?.append(monthInputElm)
+      parent?.append(sep2)
+      parent?.append(yearInputElm)
+    } else if (newVal === DateFormat.US) {
+      parent?.append(monthInputElm)
+      parent?.append(sep1)
+      parent?.append(dayInputElm)
+      parent?.append(sep2)
+      parent?.append(yearInputElm)
+    } else if (newVal === DateFormat.ISO) {
+      parent?.append(yearInputElm)
+      parent?.append(sep1)
+      parent?.append(monthInputElm)
+      parent?.append(sep2)
+      parent?.append(dayInputElm)
     }
   }
 
@@ -130,20 +127,20 @@ export default class PDateInput extends Vue {
       which is not executed as long as you are within the date field.
    */
   blurDay(): void {
-    this.dayInput = PDateInput.normalizeInput(this.dayInput);
-    this.inDate = false
+    this.dayInput = PDateInput.normalizeInput(this.dayInput)
+    this.inDate   = false
     setTimeout(this.updateAfterBlur, 1)
   }
 
   blurMonth(): void {
-    this.monthInput = PDateInput.normalizeInput(this.monthInput);
-    this.inDate = false
+    this.monthInput = PDateInput.normalizeInput(this.monthInput)
+    this.inDate     = false
     setTimeout(this.updateAfterBlur, 1)
   }
 
   blurYear(): void {
-    this.yearInput = PDateInput.normalizeInput(this.yearInput, 4);
-    this.inDate = false
+    this.yearInput = PDateInput.normalizeInput(this.yearInput, 4)
+    this.inDate    = false
     setTimeout(this.updateAfterBlur, 1)
   }
 
@@ -151,102 +148,82 @@ export default class PDateInput extends Vue {
     this.inDate = true
   }
 
-  focusIn(input: HTMLInputElement): void {
-    input.parentElement?.classList.add('is-active', 'is-completed')
-  }
-
-  focusOut(input: HTMLInputElement): void {
-    input.parentElement?.classList.remove('is-active', 'is-completed')
-  }
-
   keydownDay(event: KeyboardEvent): boolean {
-    const acceptInput = this.filterInput(event);
+    const acceptInput = this.filterInput(event)
     if (!acceptInput) {
-      event.preventDefault();
-      return false;
+      event.preventDefault()
+      return false
     }
 
     if (!PDateInput.isNumber(event)) {
-      return true;
+      return true
     }
 
-    const newVal = this.getInputValueOnKeydown(event);
+    const newVal = this.getInputValueOnKeydown(event)
 
-    let dayOk = false;
+    let dayOk = false
     if (newVal != "00") {
-      const val = parseInt(newVal);
-      dayOk = this.isValidDay(val, this.month, this.year);
+      const val = parseInt(newVal)
+      dayOk = this.isValidDay(val, this.month, this.year)
     }
 
     if (dayOk) {
-      return true;
+      return true
     } else {
-      event.preventDefault();
-      return false;
+      event.preventDefault()
+      return false
     }
   }
 
   keydownMonth(event: KeyboardEvent): boolean {
-    const acceptInput = this.filterInput(event);
+    const acceptInput = this.filterInput(event)
     if (!acceptInput) {
-      event.preventDefault();
-      return false;
+      event.preventDefault()
+      return false
     }
 
     if (!PDateInput.isNumber(event)) {
-      return true;
+      return true
     }
 
-    const newVal = this.getInputValueOnKeydown(event);
+    const newVal = this.getInputValueOnKeydown(event)
     if (newVal !== "00") {
-      const val = parseInt(newVal);
-      const valid = this.isValidMonth(this.day, val, this.year);
+      const val   = parseInt(newVal)
+      const valid = this.isValidMonth(this.day, val, this.year)
       if (valid) {
-        return true;
+        return true
       }
     }
 
-    event.preventDefault();
-    return false;
+    event.preventDefault()
+    return false
   }
 
   keydownYear(event: KeyboardEvent): boolean {
-    const acceptInput = this.filterInput(event);
+    const acceptInput = this.filterInput(event)
     if (!acceptInput) {
-      event.preventDefault();
-      return false;
+      event.preventDefault()
+      return false
     }
 
     if (!PDateInput.isNumber(event)) {
-      return true;
+      return true
     }
 
-    const newVal = this.getInputValueOnKeydown(event);
-    const allZeroes = newVal === "0000";
+    const newVal = this.getInputValueOnKeydown(event)
+    const allZeroes = newVal === "0000"
     if (allZeroes) {
-      event.preventDefault();
-      return false;
+      event.preventDefault()
+      return false
     }
 
-    const val = parseInt(newVal);
+    const val = parseInt(newVal)
     if (newVal.length === 4 && !this.isValidYear(this.day, this.month, val)) {
-      event.preventDefault();
-      return false;
+      event.preventDefault()
+      return false
     }
 
-    return true;
-  }
-
-  get day(): number | undefined {
-    return this.dayInput ? parseInt(this.dayInput) : undefined;
-  }
-
-  get month(): number | undefined {
-    return this.monthInput ? parseInt(this.monthInput) : undefined;
-  }
-
-  get year(): number | undefined {
-    return this.yearInput ? parseInt(this.yearInput) : undefined;
+    return true
   }
 
   updateValue(): void {
@@ -254,119 +231,133 @@ export default class PDateInput extends Vue {
       this.raiseError({
         element: DateElement.DATE,
         error: "error.date.required",
-      });
-      return;
+      })
+      return
     }
 
     if (!this.yearInput) {
       this.raiseError({
         element: DateElement.DATE,
         error: "error.date.invalid",
-      });
-      return;
+      })
+      return
     }
 
-    const dateISO = `${(this.yearInput ?? "").padStart(4, "0")}-${this.monthInput ?? ""}-${this.dayInput ?? ""}`;
+    const dateISO = `${(this.yearInput ?? "").padStart(4, "0")}-${this.monthInput ?? ""}-${this.dayInput ?? ""}`
 
-    const timestamp = Date.parse(dateISO);
+    const timestamp = Date.parse(dateISO)
     const d = new Date()
     if (Number.isNaN(timestamp) || (this.year && (this.year < this.minYear || this.year > this.maxYear))) {
       this.raiseError({
         element: DateElement.DATE,
         error: "error.date.invalid",
-      });
-      return;
+      })
+      return
     }
 
     this.showError = false
-    this.$emit(`input`, this.formatToInput(dateISO));
-    this.$emit(`isoDate`, dateISO);
+    this.$emit(`input`, this.formatToInput(dateISO))
+    this.$emit(`isoDate`, dateISO)
+  }
+
+  /* COMPUTED PROPERTIES */
+  get day(): number | undefined {
+    return this.dayInput ? parseInt(this.dayInput) : undefined
+  }
+
+  get month(): number | undefined {
+    return this.monthInput ? parseInt(this.monthInput) : undefined
+  }
+
+  get year(): number | undefined {
+    return this.yearInput ? parseInt(this.yearInput) : undefined
   }
 
   private isLeapYear = (year?: number): boolean => {
     if (!year) {
-      return false;
+      return false
     }
-    return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
-  };
+    return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)
+  }
 
-  private monthWith30Days = (month: number): boolean => [4, 6, 9, 11].includes(month);
+  /* PRIVATE UTILITY/HELPER METHODS */
+  private monthWith30Days = (month: number): boolean => [4, 6, 9, 11].includes(month)
   private monthWith31Days = (month: number): boolean =>
-      [1, 3, 5, 7, 8, 10, 12].includes(month);
+      [1, 3, 5, 7, 8, 10, 12].includes(month)
 
 
   private isValidDay(day?: number, month?: number, year?: number): boolean {
     if (!day) {
-      return true;
+      return true
     }
 
     if (day < 29) {
-      return true;
+      return true
     }
 
     if (month) {
       if (day === 30 && this.monthWith30Days(month)) {
-        return true;
+        return true
       }
       if (day === 31 && this.monthWith31Days(month)) {
-        return true;
+        return true
       }
       if (day === 29 && month === 2 && this.isLeapYear(year)) {
-        return true;
+        return true
       }
 
-      return day < 30;
+      return day < 30
     }
 
-    return day < 32;
+    return day < 32
   }
 
   private isValidMonth(day?: number, month?: number, year?: number): boolean {
     if (!month) {
-      return true;
+      return true
     }
 
     if (month > 12) {
-      return false;
+      return false
     }
 
     if (day) {
       if (this.monthWith30Days(month)) {
-        return day < 31;
+        return day < 31
       }
       if (this.monthWith31Days(month)) {
-        return day < 32;
+        return day < 32
       }
       if (month === 2) {
         if (!year || this.isLeapYear(year)) {
-          return day < 30;
+          return day < 30
         }
 
-        return day < 29;
+        return day < 29
       }
     }
 
-    return true;
+    return true
   }
 
   private isValidYear(day?: number, month?: number, year?: number): boolean {
     if (!year) {
-      return true;
+      return true
     }
 
     if (month === 2 && day && day === 29 && !this.isLeapYear(year)) {
-      return false;
+      return false
     }
 
-    return year >= this.minYear && year <= this.maxYear;
+    return year >= this.minYear && year <= this.maxYear
   }
 
   private raiseError(error: InputError) {
-    this.$emit(`error`, error);
+    this.$emit(`error`, error)
   }
 
   private static isNumber(event: KeyboardEvent): boolean {
-    return event.key >= "0" && event.key <= "9";
+    return event.key >= "0" && event.key <= "9"
   }
 
   private filterInput(event: KeyboardEvent): boolean {
@@ -379,35 +370,35 @@ export default class PDateInput extends Vue {
   and block any input before it is written
   */
   private getInputValueOnKeydown(event: KeyboardEvent): string {
-    const inputElement = event.currentTarget as HTMLInputElement;
-    const caretPos = PDateInput.caretPosition(inputElement);
+    const inputElement = event.currentTarget as HTMLInputElement
+    const caretPos = PDateInput.caretPosition(inputElement)
 
     if (caretPos == inputElement.maxLength) {
-      return inputElement.value;
+      return inputElement.value
     }
 
-    const selectedText = document.getSelection()?.toString();
+    const selectedText = document.getSelection()?.toString()
     const inputValue = selectedText
         ? inputElement.value.replace(selectedText, "")
-        : inputElement.value;
+        : inputElement.value
 
     if (caretPos === 0) {
-      return event.key + inputValue;
+      return event.key + inputValue
     } else {
       if (inputElement.maxLength === 2) {
-        return inputValue + event.key;
+        return inputValue + event.key
       } else {
         return (
             inputValue.substring(0, caretPos) +
             event.key +
             inputValue.substring(caretPos)
-        );
+        )
       }
     }
   }
 
   private nextElement(event: KeyboardEvent): void {
-    this.focusNextElement(event.currentTarget as HTMLInputElement);
+    this.focusNextElement(event.currentTarget as HTMLInputElement)
   }
 
   private nextInputElement(
@@ -416,60 +407,60 @@ export default class PDateInput extends Vue {
     switch (this.format) {
       case DateFormat.EU:
         if (element === this.$refs.day) {
-          return this.$refs.month as HTMLInputElement;
+          return this.$refs.month as HTMLInputElement
         } else if (element === this.$refs.month) {
-          return this.$refs.year as HTMLInputElement;
+          return this.$refs.year as HTMLInputElement
         } else {
-          return undefined;
+          return undefined
         }
       case DateFormat.US:
         if (element === this.$refs.day) {
-          return this.$refs.year as HTMLInputElement;
+          return this.$refs.year as HTMLInputElement
         } else if (element === this.$refs.month) {
-          return this.$refs.day as HTMLInputElement;
+          return this.$refs.day as HTMLInputElement
         } else {
-          return undefined;
+          return undefined
         }
       case DateFormat.ISO:
         if (element === this.$refs.day) {
-          return undefined;
+          return undefined
         } else if (element === this.$refs.month) {
-          return this.$refs.day as HTMLInputElement;
+          return this.$refs.day as HTMLInputElement
         } else {
-          return this.$refs.month as HTMLInputElement;
+          return this.$refs.month as HTMLInputElement
         }
     }
   }
 
   private focusNextElement(element: HTMLInputElement): void {
-    const nextElement = this.nextInputElement(element);
+    const nextElement = this.nextInputElement(element)
 
     if (nextElement && element.value.length == element.maxLength) {
-      nextElement.select();
-      nextElement.focus();
+      nextElement.select()
+      nextElement.focus()
     }
   }
 
   private static caretPosition(input: HTMLInputElement): number {
-    let iCaretPos = 0;
+    let iCaretPos = 0
     if (input.selectionStart || input.selectionStart === 0) {
       iCaretPos =
           input.selectionDirection == "backward"
               ? input.selectionStart
-              : input.selectionEnd ?? 0;
+              : input.selectionEnd ?? 0
     }
 
-    return iCaretPos;
+    return iCaretPos
   }
 
   private log(msg: string): void {
-    this.$emit("log", msg);
+    this.$emit("log", msg)
   }
 
   private clearDate() {
-    this.dayInput = "";
-    this.monthInput = "";
-    this.yearInput = "";
+    this.dayInput   = ""
+    this.monthInput = ""
+    this.yearInput  = ""
   }
 
   private updateAfterBlur(): void {
@@ -480,7 +471,7 @@ export default class PDateInput extends Vue {
   }
 
   private static normalizeInput(input: string, length = 2): string {
-    let output = input.trim();
+    let output = input.trim()
     if (output.length > 0) {
       if (
           output === "0" ||
@@ -488,14 +479,14 @@ export default class PDateInput extends Vue {
           output === "000" ||
           output === "0000"
       ) {
-        output = "";
+        output = ""
       }
       if (output.length === 1) {
-        output = output.padStart(length, "0");
+        output = output.padStart(length, "0")
       }
     }
 
-    return output;
+    return output
   }
 
   private formatToInput(isoDate: string): string {
@@ -505,22 +496,22 @@ export default class PDateInput extends Vue {
     switch (this.format) {
       case DateFormat.EU:
         date = `${dateParts[2].padEnd(2, '0')}${this.separator}${dateParts[1].padEnd(2, '0')}${this.separator}${dateParts[0].padEnd(4, '0')}`
-        break;
+        break
       case DateFormat.US:
         date = `${dateParts[1].padEnd(2, '0')}${this.separator}${dateParts[2].padEnd(2, '0')}${this.separator}${dateParts[0].padEnd(4, '0')}`
-        break;
+        break
       case DateFormat.ISO:
         date = `${dateParts[0].padEnd(2, '0')}${this.separator}${dateParts[1].padEnd(2, '0')}${this.separator}${dateParts[2].padEnd(4, '0')}`
-        break;
+        break
     }
 
-    return date;
+    return date
   }
 
   private assignNewValue(newValue: string): void {
-    const dayInputElm = this.$refs.day as HTMLInputElement;
-    const monthInputElm = this.$refs.month as HTMLInputElement;
-    const yearInputElm = this.$refs.year as HTMLInputElement;
+    const dayInputElm   = this.$refs.day as HTMLInputElement
+    const monthInputElm = this.$refs.month as HTMLInputElement
+    const yearInputElm  = this.$refs.year as HTMLInputElement
 
     const dateParts = newValue.split(this.separator)
     let day   = ""
@@ -530,29 +521,29 @@ export default class PDateInput extends Vue {
     if (dateParts.length === 3) {
       switch (this.format) {
         case DateFormat.EU:
-          day = dateParts[0]
+          day   = dateParts[0]
           month = dateParts[1]
-          year = dateParts[2]
-          break;
+          year  = dateParts[2]
+          break
         case DateFormat.US:
           month = dateParts[0]
-          day = dateParts[1]
-          year = dateParts[2]
-          break;
+          day   = dateParts[1]
+          year  = dateParts[2]
+          break
         case DateFormat.ISO:
-          year = dateParts[0]
+          year  = dateParts[0]
           month = dateParts[1]
-          day = dateParts[2]
-          break;
+          day   = dateParts[2]
+          break
       }
 
       if (this.isDatePartEmpty(year) && this.isDatePartEmpty(month) && this.isDatePartEmpty(day)) {
         return
       }
 
-      this.dayInput = day.padStart(2, '0')
+      this.dayInput   = day.padStart(2, '0')
       this.monthInput = month.padStart(2, '0')
-      this.yearInput = year.padStart(4, '0')
+      this.yearInput  = year.padStart(4, '0')
 
       dayInputElm.blur()
       monthInputElm.blur()
@@ -569,7 +560,7 @@ export default class PDateInput extends Vue {
         "Tab shiftKey",
         "ArrowLeft",
         "ArrowRight",
-      ].includes(code);
+      ].includes(code)
 
   private isDatePartEmpty: (val?: string) => boolean = (datePart?: string) => !datePart || !datePart.trim() || datePart === '00' || datePart === '0000'
 }
