@@ -36,4 +36,4 @@ All properties have a runtime impact, that is you can change it and you will dir
 The date component returns an iso date, just like input of type date.
 
 ## Not ready for production
-I wouldn't say that this component is ready for production. It might still contain errors. One error I'm aware off is when you turn off insertion mode. This will not insert the value, but overwrite it. This has to be fixed.
+This component has not been used in production, so there might still be some issues. Please let me know if you decide to clone this project and you found a bug.
