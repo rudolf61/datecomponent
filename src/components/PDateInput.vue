@@ -80,7 +80,6 @@ export default class PDateInput extends Vue {
   @Watch("value")
   watchValue(newValue: string)
   {
-      this.log(`Watch value ${newValue}`)
       this.assignNewValue(newValue)
   }
 
@@ -161,10 +160,7 @@ export default class PDateInput extends Vue {
   }
 
   keydownDay(event: KeyboardEvent): boolean {
-    this.log(`Day character code ${event.key}`);
-
     const acceptInput = this.filterInput(event);
-    this.log(`Accept input ${acceptInput}`);
     if (!acceptInput) {
       event.preventDefault();
       return false;
@@ -175,15 +171,12 @@ export default class PDateInput extends Vue {
     }
 
     const newVal = this.getInputValueOnKeydown(event);
-    this.log(`newVal= ${newVal}`);
 
     let dayOk = false;
     if (newVal != "00") {
       const val = parseInt(newVal);
       dayOk = this.isValidDay(val, this.month, this.year);
     }
-
-    this.log(`Is day ok? ${dayOk}`);
 
     if (dayOk) {
       return true;
@@ -194,10 +187,7 @@ export default class PDateInput extends Vue {
   }
 
   keydownMonth(event: KeyboardEvent): boolean {
-    this.log(`Month character code ${event.key}`);
-
     const acceptInput = this.filterInput(event);
-    this.log(`Accept input ${acceptInput}`);
     if (!acceptInput) {
       event.preventDefault();
       return false;
@@ -208,11 +198,9 @@ export default class PDateInput extends Vue {
     }
 
     const newVal = this.getInputValueOnKeydown(event);
-    this.log(`newVal= ${newVal}`);
     if (newVal !== "00") {
       const val = parseInt(newVal);
       const valid = this.isValidMonth(this.day, val, this.year);
-      this.log(`Is month valid ${valid}`);
       if (valid) {
         return true;
       }
@@ -223,10 +211,7 @@ export default class PDateInput extends Vue {
   }
 
   keydownYear(event: KeyboardEvent): boolean {
-    this.log(`Year character code ${event.key}`);
-
     const acceptInput = this.filterInput(event);
-    this.log(`Accept input ${acceptInput}`);
     if (!acceptInput) {
       event.preventDefault();
       return false;
@@ -238,7 +223,6 @@ export default class PDateInput extends Vue {
 
     const newVal = this.getInputValueOnKeydown(event);
     const allZeroes = newVal === "0000";
-    this.log(`newVal= ${newVal} is all zeroes ${allZeroes}`);
     if (allZeroes) {
       event.preventDefault();
       return false;
@@ -266,8 +250,6 @@ export default class PDateInput extends Vue {
   }
 
   updateValue(): void {
-    this.log('updateValue')
-
     if ((!this.day || !this.month || !this.year) && this.required) {
       this.raiseError({
         element: DateElement.DATE,
@@ -285,7 +267,7 @@ export default class PDateInput extends Vue {
     }
 
     const dateISO = `${(this.yearInput ?? "").padStart(4, "0")}-${this.monthInput ?? ""}-${this.dayInput ?? ""}`;
-    this.log(`updateValue: dateISO equals ${dateISO}`)
+
     const timestamp = Date.parse(dateISO);
     const d = new Date()
     if (Number.isNaN(timestamp) || (this.year && (this.year < this.minYear || this.year > this.maxYear))) {
@@ -431,7 +413,6 @@ export default class PDateInput extends Vue {
   private nextInputElement(
       element: HTMLInputElement
   ): HTMLInputElement | undefined {
-    this.log(`nextInpuElement: day ${element === this.$refs.day} month ${this.$refs.month as HTMLInputElement}`)
     switch (this.format) {
       case DateFormat.EU:
         if (element === this.$refs.day) {
@@ -462,7 +443,7 @@ export default class PDateInput extends Vue {
 
   private focusNextElement(element: HTMLInputElement): void {
     const nextElement = this.nextInputElement(element);
-    this.log(`next ${nextElement}`)
+
     if (nextElement && element.value.length == element.maxLength) {
       nextElement.select();
       nextElement.focus();
@@ -564,8 +545,6 @@ export default class PDateInput extends Vue {
           day = dateParts[2]
           break;
       }
-
-      this.log(`The new values of day: ${day} month: ${month} year: ${year} `)
 
       if (this.isDatePartEmpty(year) && this.isDatePartEmpty(month) && this.isDatePartEmpty(day)) {
         return
