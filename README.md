@@ -35,3 +35,5 @@ To give you an idea about its behaviour. When you would fill in 31 as day this w
 All properties have a runtime impact, that is you can change it and you will directly see the consequences.
 The date component returns an iso date, just like input of type date.
 
+## Not ready for production
+I wouldn't say that this component is ready for production. It might still contain errors. One error I'm aware off is when you use insertion mode. This will not insert the value, but overwrite it. This has to be fixed.
