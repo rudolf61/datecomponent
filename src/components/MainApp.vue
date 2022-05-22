@@ -40,11 +40,13 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col>
+
+      <v-col offset="2" cols="3">
         <p-date-input
             v-model="date"
             @log="logMessage"
             @error="reportError"
+            @isoDate="isoDate"
             :required="required"
             :clearable="clearable"
             :min-year="minYear"
@@ -55,10 +57,10 @@
         />
       </v-col>
       <v-col>
-        <p>Entered valid date: {{ date }}</p>
-        <p>Error {{ errorDescription }}</p>
-
-        <p>showInError {{ showInError }}</p>
+        <p>ISO date: {{ iso }}<br>
+           Entered data: {{ date }}<br>
+           Error: {{ errorDescription }}<br>
+           showInError: {{ showInError }}</p>
       </v-col>
     </v-row>
     <v-row>
@@ -69,7 +71,7 @@
 
     <v-row class="log">
       <v-col>
-        <span v-for="[msg, idx] in messages" :key="idx">{{ idx }} {{ msg }}<br></span>
+        <span v-for="(msg, idx) in messages" :key="idx">{{ idx }} {{ msg }}<br></span>
       </v-col>
     </v-row>
   </v-container>
@@ -103,6 +105,7 @@ export default class MainApp extends Vue {
 
   readonly dateRange = [1900, 2000]
 
+  iso = ""
   minYear = 1900
   maxYear = 2100
   required = false
@@ -110,7 +113,7 @@ export default class MainApp extends Vue {
   separator = '-'
   format = 'EU'
 
-  @Watch("date")
+  @Watch("date", { immediate: true })
   watchDate(isoDate: string): void {
     this.errorDescription = ""
     this.showInError = false
@@ -133,6 +136,12 @@ export default class MainApp extends Vue {
   reportError(error: InputError): void {
     this.showInError = true
     this.errorDescription = `${error.element} - ${error.error}`
+  }
+
+  isoDate(value: string) {
+    this.errorDescription = ""
+    this.showInError = false
+    this.iso = value
   }
 }
 </script>
