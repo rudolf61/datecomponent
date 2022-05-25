@@ -1,5 +1,5 @@
 <template>
-  <div class="__pdate_input" :class="{ __pdateinput_error : showError }">
+  <div class="__pdate_input" :class="{ __pdateinput_error : showError, __clearable : clearable, __not_clearable : !clearable }">
     <div class="datewrapper">
       <input
           size="2"
@@ -432,10 +432,24 @@ export default class PDateInput extends Vue {
     }
   }
 
+  private isComplete(element: HTMLInputElement): boolean {
+    let complete = element.value.length == element.maxLength
+    if (!complete) {
+      if (element.classList.contains("w-day")) {
+          complete = element.value > '3'
+      }
+      else if (element.classList.contains("w-month")) {
+        complete = element.value > '1'
+      }
+
+    }
+    return  complete
+  }
+
   private focusNextElement(element: HTMLInputElement): void {
     const nextElement = this.nextInputElement(element)
 
-    if (nextElement && element.value.length == element.maxLength) {
+    if (nextElement && this.isComplete(element)) {
       nextElement.select()
       nextElement.focus()
     }
@@ -461,6 +475,7 @@ export default class PDateInput extends Vue {
     this.dayInput   = ""
     this.monthInput = ""
     this.yearInput  = ""
+    this.showError = false
   }
 
   private updateAfterBlur(): void {
@@ -580,6 +595,14 @@ export default class PDateInput extends Vue {
   padding: 4px 3px 4px 6px;
   border: 1px gray solid;
   border-radius: 4px;
+}
+
+.__clearable {
+  width: 9rem;
+}
+
+.__not_clearable {
+  width: 8rem;
 }
 
 .datewrapper {
