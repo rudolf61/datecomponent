@@ -47,6 +47,7 @@
             @log="logMessage"
             @error="reportError"
             @isoDate="isoDate"
+            @reset="reset"
             :required="required"
             :clearable="clearable"
             :min-year="minYear"
@@ -142,6 +143,11 @@ export default class MainApp extends Vue {
     this.errorDescription = ""
     this.showInError = false
     this.iso = value
+  }
+
+  reset() {
+    this.errorDescription = ""
+    this.showInError = false
   }
 }
 </script>

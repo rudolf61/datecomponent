@@ -1,5 +1,5 @@
 <template>
-  <div class="__pdate_input" :class="{ __pdateinput_error : showError, __clearable : clearable, __not_clearable : !clearable }">
+  <div class="__pdate_input" tabindex="0" :class="{ __pdateinput_error : showError, __clearable : clearable, __not_clearable : !clearable }">
     <div class="datewrapper">
       <input
           size="2"
@@ -8,7 +8,7 @@
           v-model="dayInput"
           class="__pdate_input__input __pdate_input__input--day w-day"
           type="tel"
-          placeholder="dd"
+          placeholder="DD"
           @keydown="keydownDay"
           @input="nextElement"
           @blur="blurDay"
@@ -22,7 +22,7 @@
           v-model="monthInput"
           class="__pdate_input__input __pdate_input__input--month w-month"
           type="tel"
-          placeholder="mm"
+          placeholder="MM"
           @keydown="keydownMonth"
           @input="nextElement"
           @blur="blurMonth"
@@ -36,7 +36,7 @@
           v-model="yearInput"
           class="__pdate_input__input __pdate_input__input--year w-year"
           type="tel"
-          placeholder="yyyy"
+          placeholder="YYYY"
           @keydown="keydownYear"
           @input="nextElement"
           @blur="blurYear"
@@ -144,7 +144,11 @@ export default class PDateInput extends Vue {
     setTimeout(this.updateAfterBlur, 1)
   }
 
-  focusDate(): void {
+  focusDate(event: FocusEvent): void {
+    const inputElm = event.currentTarget as HTMLInputElement
+    inputElm.focus()
+    inputElm.select()
+
     this.inDate = true
   }
 
@@ -227,6 +231,11 @@ export default class PDateInput extends Vue {
   }
 
   updateValue(): void {
+
+    if (this.isEmpty && !this.required) {
+      return
+    }
+
     if ((!this.day || !this.month || !this.year) && this.required) {
       this.raiseError({
         element: DateElement.DATE,
@@ -271,6 +280,12 @@ export default class PDateInput extends Vue {
 
   get year(): number | undefined {
     return this.yearInput ? parseInt(this.yearInput) : undefined
+  }
+
+  get isEmpty(): boolean {
+    return (this.day   === undefined || this.day   === 0)
+        && (this.month === undefined || this.month === 0)
+        && (this.year  === undefined  || this.year  === 0)
   }
 
   private isLeapYear = (year?: number): boolean => {
@@ -450,7 +465,6 @@ export default class PDateInput extends Vue {
     const nextElement = this.nextInputElement(element)
 
     if (nextElement && this.isComplete(element)) {
-      nextElement.select()
       nextElement.focus()
     }
   }
@@ -476,10 +490,10 @@ export default class PDateInput extends Vue {
     this.monthInput = ""
     this.yearInput  = ""
     this.showError = false
+    this.$emit('reset')
   }
 
   private updateAfterBlur(): void {
-    // is false if user leaves date field
     if (!this.inDate) {
       this.updateValue()
     }
@@ -597,6 +611,16 @@ export default class PDateInput extends Vue {
   border-radius: 4px;
 }
 
+.__pdate_input:focus-within {
+  border-color: cornflowerblue;
+  border-width: 2px;
+}
+
+.__pdate_input.__pdateinput_error:focus-within {
+  border-color: red;
+  border-width: 2px;
+}
+
 .__clearable {
   width: 9rem;
 }
@@ -614,6 +638,10 @@ export default class PDateInput extends Vue {
 
 input, span, .clear {
   display: inline-block;
+}
+
+input:focus {
+  outline: none;
 }
 
 .w-day {
