@@ -74,7 +74,7 @@ export default class PDateInput extends Vue {
 
   /* EVENT HANDLERS */
   @Watch("value")
-  watchValue(newValue: string)
+  watchValue(newValue: string): void
   {
       this.assignNewValue(newValue)
   }
@@ -163,7 +163,7 @@ export default class PDateInput extends Vue {
       return true
     }
 
-    const newVal = this.getInputValueOnKeydown(event)
+    const newVal = PDateInput.getInputValueOnKeydown(event)
 
     let dayOk = false
     if (newVal != "00") {
@@ -190,7 +190,7 @@ export default class PDateInput extends Vue {
       return true
     }
 
-    const newVal = this.getInputValueOnKeydown(event)
+    const newVal = PDateInput.getInputValueOnKeydown(event)
     if (newVal !== "00") {
       const val   = parseInt(newVal)
       const valid = this.isValidMonth(this.day, val, this.year)
@@ -214,7 +214,7 @@ export default class PDateInput extends Vue {
       return true
     }
 
-    const newVal = this.getInputValueOnKeydown(event)
+    const newVal = PDateInput.getInputValueOnKeydown(event)
     const allZeroes = newVal === "0000"
     if (allZeroes) {
       event.preventDefault()
@@ -255,7 +255,7 @@ export default class PDateInput extends Vue {
     const dateISO = `${(this.yearInput ?? "").padStart(4, "0")}-${this.monthInput ?? ""}-${this.dayInput ?? ""}`
 
     const timestamp = Date.parse(dateISO)
-    const d = new Date()
+
     if (Number.isNaN(timestamp) || (this.year && (this.year < this.minYear || this.year > this.maxYear))) {
       this.raiseError({
         element: DateElement.DATE,
@@ -384,7 +384,7 @@ export default class PDateInput extends Vue {
   This method emulates this. This enables the keydown event to validate the final value
   and block any input before it is written
   */
-  private getInputValueOnKeydown(event: KeyboardEvent): string {
+  private static getInputValueOnKeydown(event: KeyboardEvent): string {
     const inputElement = event.currentTarget as HTMLInputElement
     const caretPos = PDateInput.caretPosition(inputElement)
 
@@ -447,7 +447,7 @@ export default class PDateInput extends Vue {
     }
   }
 
-  private isComplete(element: HTMLInputElement): boolean {
+  private static isComplete(element: HTMLInputElement): boolean {
     let complete = element.value.length == element.maxLength
     if (!complete) {
       if (element.classList.contains("w-day")) {
@@ -464,7 +464,7 @@ export default class PDateInput extends Vue {
   private focusNextElement(element: HTMLInputElement): void {
     const nextElement = this.nextInputElement(element)
 
-    if (nextElement && this.isComplete(element)) {
+    if (nextElement && PDateInput.isComplete(element)) {
       nextElement.focus()
     }
   }
