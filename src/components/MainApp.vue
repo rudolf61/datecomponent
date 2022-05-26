@@ -29,6 +29,11 @@
     </v-row>
     <v-row>
       <v-col cols="6">
+        <v-checkbox v-model="eagerEmit" label="Eager emit?"></v-checkbox>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="6">
         <v-range-slider
             v-model="dateRange"
             min="1800"
@@ -42,7 +47,7 @@
     <v-row>
 
       <v-col offset="2" cols="3">
-        <p-date-input
+        <p-plain-date-input
             v-model="date"
             @log="logMessage"
             @error="reportError"
@@ -55,6 +60,7 @@
             :format="format"
             :separator="separator"
             :show-in-error="showInError"
+            :eager-emit="eagerEmit"
         />
       </v-col>
       <v-col>
@@ -64,6 +70,18 @@
            showInError: {{ showInError }}</p>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col cols="6">
+        <p-date-input
+            v-model="dateObject"
+            format="DD-MM-YYYY"
+            :required="required"
+            :dense="false"
+            :error-messages="errorMessages"
+        ></p-date-input>
+      </v-col>
+    </v-row>
+
     <v-row>
       <v-col>
         <button @click="messages = []">Clear</button>
@@ -81,20 +99,24 @@
 <script lang="ts">
 import Component from 'vue-class-component'
 import {Prop, Vue, Watch} from 'vue-property-decorator';
-import PDateInput from './PDateInput.vue';
+import PPlainDateInput from './PPlainDateInput.vue';
 import {InputError} from './type';
+import PDateInput from "@/components/PDateInput.vue";
 
 @Component({
   components: {
-    PDateInput
+    PDateInput,
+    PPlainDateInput
   }
 })
 export default class MainApp extends Vue {
   @Prop() private msg!: string;
+  dateObject = new Date("2001-12-23")
   date = ""
   errorDescription = ""
   messages: Array<string> = []
   showInError = false
+  errorMessages:Array<string> = []
 
   readonly formatItems = [
     { code: 'EU',  format: 'DD-MM-YYYY' },
@@ -111,6 +133,7 @@ export default class MainApp extends Vue {
   maxYear = 2100
   required = false
   clearable = true
+  eagerEmit=true
   separator = '-'
   format = 'EU'
 
@@ -126,7 +149,7 @@ export default class MainApp extends Vue {
     this.maxYear = newValue[1]
   }
 
-  get hintRange() {
+  get hintRange(): string {
     return ` min ${this.dateRange[0]} - max ${this.dateRange[1]}`
   }
 
@@ -139,13 +162,13 @@ export default class MainApp extends Vue {
     this.errorDescription = `${error.element} - ${error.error}`
   }
 
-  isoDate(value: string) {
+  isoDate(value: string): void {
     this.errorDescription = ""
     this.showInError = false
     this.iso = value
   }
 
-  reset() {
+  reset(): void {
     this.errorDescription = ""
     this.showInError = false
   }
