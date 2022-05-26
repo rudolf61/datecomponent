@@ -1,7 +1,7 @@
 # Custom Vue date component
 
 ## Purpose
-This is a simple custom date component without a fancy date picker (PPLainDateInput). It is a simple, but it is a real date component which only accepts valid date input.
+This is a simple custom date component without a fancy date picker (PPLainDateInput). It is a simple, but real date component which only accepts valid date input.
 
 It has support for three most common date formats EU, US and ISO, but could easily be extended.
 
