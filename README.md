@@ -6,7 +6,7 @@ This is a simple custom date component without a fancy date picker (PPLainDateIn
 It has support for three most common date formats EU, US and ISO, but could easily be extended.
 
 ## As simple as possible but not too simple 
-Although this may sound simple, it is not. The only moment you can block an input is when you catch all keydown events. But at these moments the value is not yet committed. So, I construct the value as if it was committed. It is not as simple as appending, because a characters can be inserted anywhere.
+Although this may sound simple, it is not. The only moment you can block an input is when you catch all keydown events. But at these moments the value is not yet committed. So, I construct the value as if it was committed. It is not as simple as appending, because a character can be inserted anywhere.
 
 ## Vue Class Component
 I have used Vue Class Component. It shouldn't be too difficult to turn it into a Vue 3 component for example or even a React component.
