@@ -49,6 +49,7 @@
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from "vue-property-decorator"
 import {DateElement, DateFormat, InputError} from "./type"
+import {EventKey} from "@/components/HTMLConstants";
 
 @Component
 export default class PPlainDateInput extends Vue {
@@ -128,9 +129,8 @@ export default class PPlainDateInput extends Vue {
   }
 
   emitWhenComplete(): void {
-    this.log("emitWhenComplete, endOfElement " + this.endOfElement)
-    this.logState()
-
+    // called at keyup and only executed in eagerMode.
+    // fieldComplete and this.endOfElement are internal states related to keydown event
     if (this.fieldComplete && !this.endOfElement && this.eagerEmit && this.isDateComplete()) {
       this.updateValue()
     }
@@ -142,14 +142,12 @@ export default class PPlainDateInput extends Vue {
       which is not executed as long as you are within the date field.
    */
   blurDay(event: FocusEvent): void {
-    this.log("blurDay")
     this.dayInput = PPlainDateInput.normalizeInput(this.dayInput)
     this.inDate   = false
     setTimeout(this.updateAfterBlur, 1)
   }
 
   blurMonth(event: FocusEvent): void {
-    this.log("blurMonth")
     this.monthInput = PPlainDateInput.normalizeInput(this.monthInput)
     this.inDate     = false
     setTimeout(this.updateAfterBlur, 1)
@@ -157,7 +155,6 @@ export default class PPlainDateInput extends Vue {
 
   blurYear(event: FocusEvent): void {
     let relatedTarget = event.relatedTarget
-    this.log("blurYear, related target " + event.relatedTarget)
     this.yearInput = PPlainDateInput.normalizeInput(this.yearInput, 4)
     this.inDate    = false
     setTimeout(this.updateAfterBlur, 1)
@@ -165,7 +162,6 @@ export default class PPlainDateInput extends Vue {
 
   focusDate(event: FocusEvent): void {
     const inputElm = event.currentTarget as HTMLInputElement
-    this.log("focusDate " + inputElm.classList.value)
     inputElm.focus()
     inputElm.select()
 
@@ -173,9 +169,6 @@ export default class PPlainDateInput extends Vue {
   }
 
   keydownDay(event: KeyboardEvent): boolean {
-    this.log("keydown day " + event.key)
-    this.logState()
-
     const acceptInput = this.filterInput(event)
     if (!acceptInput) {
       event.preventDefault()
@@ -191,7 +184,6 @@ export default class PPlainDateInput extends Vue {
     this.controlKey = false
 
     const newVal = this.getInputValueOnKeydown(event)
-    this.log("keydown newVal " + newVal)
 
     let dayOk = false
     if (newVal != "00") {
@@ -218,9 +210,6 @@ export default class PPlainDateInput extends Vue {
   }
 
   keydownMonth(event: KeyboardEvent): boolean {
-    this.log("keydown month " + event.key)
-    this.logState()
-
     const acceptInput = this.filterInput(event)
     if (!acceptInput) {
       event.preventDefault()
@@ -249,9 +238,6 @@ export default class PPlainDateInput extends Vue {
   }
 
   keydownYear(event: KeyboardEvent): boolean {
-    this.log("keydown year " + event.key)
-    this.logState()
-
     const acceptInput = this.filterInput(event)
     if (!acceptInput) {
       event.preventDefault()
@@ -283,8 +269,6 @@ export default class PPlainDateInput extends Vue {
   }
 
   updateValue(): void {
-    this.log("updateValue")
-
     if (this.isEmpty && !this.required) {
       return
     }
@@ -306,12 +290,9 @@ export default class PPlainDateInput extends Vue {
     }
 
     const dateISO = `${(this.yearInput ?? "").padStart(4, "0")}-${this.monthInput ?? ""}-${this.dayInput ?? ""}`
-    this.log("isoDate " + dateISO)
-
     const timestamp = Date.parse(dateISO)
 
     if (Number.isNaN(timestamp) || (this.year && (this.year < this.minYear || this.year > this.maxYear))) {
-      this.log("Not a valid date")
       if (!this.inDate) {
         this.raiseError({
           element: DateElement.DATE,
@@ -321,7 +302,6 @@ export default class PPlainDateInput extends Vue {
       return
     }
 
-    this.log("Emit value")
     this.showError = false
     this.$emit(`input`, this.formatToInput(dateISO))
     this.$emit(`isoDate`, dateISO)
@@ -454,7 +434,7 @@ export default class PPlainDateInput extends Vue {
   }
 
   private filterInput(event: KeyboardEvent): boolean {
-    return this.ACCEPT_CODE(event.code) || PPlainDateInput.isNumber(event)
+    return this.ACCEPT_CODE(event.code as EventKey) || PPlainDateInput.isNumber(event)
   }
 
   /*
@@ -463,7 +443,6 @@ export default class PPlainDateInput extends Vue {
   and block any input before it is written
   */
   private getInputValueOnKeydown(event: KeyboardEvent): string {
-    this.log("getInputValueOnKeydown")
     const inputElement = event.currentTarget as HTMLInputElement
     const caretPos = PPlainDateInput.caretPosition(inputElement)
     this.endOfElement = false;
@@ -473,7 +452,6 @@ export default class PPlainDateInput extends Vue {
         ? inputElement.value.replace(selectedText, "")
         : inputElement.value
 
-    this.log("selected text" + selectedText + "  inputValue " + inputValue)
     if (caretPos == inputElement.maxLength) {
       this.endOfElement = true
       this.virtualValue = "0" + event.key
@@ -498,7 +476,6 @@ export default class PPlainDateInput extends Vue {
   }
 
   private nextElement(event: KeyboardEvent): void {
-    this.log("nextElement")
     const element = event.target as HTMLInputElement
     if (this.endOfElement) {
       element.value = this.virtualValue
@@ -539,7 +516,6 @@ export default class PPlainDateInput extends Vue {
   }
 
   private isComplete(element: HTMLInputElement): boolean {
-    this.log("Virtual value " + this.virtualValue + ", element value " + element.value)
     let complete = this.virtualValue.length === element.maxLength && element.value.length > 0
     if (!complete) {
       if (element.classList.contains("w-day")) {
@@ -551,7 +527,6 @@ export default class PPlainDateInput extends Vue {
 
     }
 
-    this.log("Field is complete? " + complete)
     return  complete
   }
 
@@ -675,19 +650,17 @@ export default class PPlainDateInput extends Vue {
       this.monthInput = month.padStart(2, '0')
       this.yearInput  = year.padStart(4, '0')
 
-      this.updateValue()
-
     }
   }
 
-  private ACCEPT_CODE: (code: string) => boolean = (code: string) =>
+  private ACCEPT_CODE: (code: EventKey) => boolean = (code: EventKey) =>
       [
-        "Delete",
-        "Backspace",
-        "Tab",
-        "Tab shiftKey",
-        "ArrowLeft",
-        "ArrowRight",
+        EventKey.Delete,
+        EventKey.Backspace,
+        EventKey.Tab,
+        EventKey.TabShiftKey,
+        EventKey.ArrowLeft,
+        EventKey.ArrowRight,
       ].includes(code)
 
   private isDatePartEmpty: (val?: string) => boolean = (datePart?: string) => !datePart || !datePart.trim() || datePart === '00' || datePart === '0000'
