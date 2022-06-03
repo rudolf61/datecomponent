@@ -3,7 +3,6 @@
   <div class="date-input" :class="{ 'required': required }">
     <v-text-field
         v-model="dateString"
-        v-mask="format"
         clearable
         type="date"
         :dense="dense"

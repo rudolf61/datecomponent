@@ -1,5 +1,5 @@
 <template>
-  <div class="__pdate_input" tabindex="0" :class="{ __pdateinput_error : showError, __clearable : clearable, __not_clearable : !clearable }">
+  <div class="__pdate_input" tabindex="-1" :class="{ __pdateinput_error : showError, __clearable : clearable, __not_clearable : !clearable }">
     <div class="datewrapper" @keyup.capture="emitWhenComplete">
       <input
           size="2"
@@ -14,7 +14,7 @@
           @blur="blurDay"
           @focus="focusDate"
       />
-      <span ref="sep1" class="__pdate_input__divider span-1">{{ separator }}</span>
+      <span ref="sep1" tabindex="-1" class="__pdate_input__divider span-1">{{ separator }}</span>
       <input
           ref="month"
           size="2"
@@ -28,7 +28,7 @@
           @blur="blurMonth"
           @focus="focusDate"
       />
-      <span ref="sep2" class="__pdate_input__divider span-2">{{ separator }}</span>
+      <span ref="sep2" tabindex="-1" class="__pdate_input__divider span-2">{{ separator }}</span>
       <input
           ref="year"
           size="4"
@@ -43,7 +43,7 @@
           @focus="focusDate"
       />
     </div>
-    <a v-if="clearable && notEmpty" ref="clear" class="clear" @click="clearDate">&#9932;</a>
+    <a v-if="clearable && notEmpty" tabindex="-1" ref="clear" class="clear" @click="clearDate">&#9932;</a>
   </div>
 </template>
 <script lang="ts">
@@ -129,6 +129,8 @@ export default class PPlainDateInput extends Vue {
 
   emitWhenComplete(): void {
     this.log("emitWhenComplete, endOfElement " + this.endOfElement)
+    this.logState()
+
     if (this.fieldComplete && !this.endOfElement && this.eagerEmit && this.isDateComplete()) {
       this.updateValue()
     }
@@ -139,22 +141,23 @@ export default class PPlainDateInput extends Vue {
       Within the date field the blur is followed by a focus and then updateAfterBlur,
       which is not executed as long as you are within the date field.
    */
-  blurDay(): void {
+  blurDay(event: FocusEvent): void {
     this.log("blurDay")
     this.dayInput = PPlainDateInput.normalizeInput(this.dayInput)
     this.inDate   = false
     setTimeout(this.updateAfterBlur, 1)
   }
 
-  blurMonth(): void {
+  blurMonth(event: FocusEvent): void {
     this.log("blurMonth")
     this.monthInput = PPlainDateInput.normalizeInput(this.monthInput)
     this.inDate     = false
     setTimeout(this.updateAfterBlur, 1)
   }
 
-  blurYear(): void {
-    this.log("blurYear")
+  blurYear(event: FocusEvent): void {
+    let relatedTarget = event.relatedTarget
+    this.log("blurYear, related target " + event.relatedTarget)
     this.yearInput = PPlainDateInput.normalizeInput(this.yearInput, 4)
     this.inDate    = false
     setTimeout(this.updateAfterBlur, 1)
@@ -170,7 +173,9 @@ export default class PPlainDateInput extends Vue {
   }
 
   keydownDay(event: KeyboardEvent): boolean {
-    this.log("keydown day")
+    this.log("keydown day " + event.key)
+    this.logState()
+
     const acceptInput = this.filterInput(event)
     if (!acceptInput) {
       event.preventDefault()
@@ -180,8 +185,7 @@ export default class PPlainDateInput extends Vue {
     if (!PPlainDateInput.isNumber(event)) {
       this.controlKey = true
       this.virtualValue = ""
-      this.moveToNextField(event);
-      return true
+      return this.moveToNextField(event);
     }
 
     this.controlKey = false
@@ -203,16 +207,20 @@ export default class PPlainDateInput extends Vue {
     }
   }
 
-  private moveToNextField(event: KeyboardEvent) {
+  private moveToNextField(event: KeyboardEvent): boolean {
     if (event.code === "ArrowRight") {
-      this.nextField(event)
+      return this.nextField(event)
     } else if (event.code === "ArrowLeft") {
-      this.previousField(event)
+      return this.previousField(event)
     }
+
+    return false
   }
 
   keydownMonth(event: KeyboardEvent): boolean {
-    this.log("keydown month")
+    this.log("keydown month " + event.key)
+    this.logState()
+
     const acceptInput = this.filterInput(event)
     if (!acceptInput) {
       event.preventDefault()
@@ -222,8 +230,7 @@ export default class PPlainDateInput extends Vue {
     if (!PPlainDateInput.isNumber(event)) {
       this.controlKey = true
       this.virtualValue = ""
-      this.moveToNextField(event);
-      return true
+      return this.moveToNextField(event);
     }
 
     this.controlKey = false
@@ -242,7 +249,9 @@ export default class PPlainDateInput extends Vue {
   }
 
   keydownYear(event: KeyboardEvent): boolean {
-    this.log("keydown year")
+    this.log("keydown year " + event.key)
+    this.logState()
+
     const acceptInput = this.filterInput(event)
     if (!acceptInput) {
       event.preventDefault()
@@ -252,8 +261,7 @@ export default class PPlainDateInput extends Vue {
     if (!PPlainDateInput.isNumber(event)) {
       this.controlKey = true
       this.virtualValue = ""
-      this.moveToNextField(event);
-      return true
+      return this.moveToNextField(event);
     }
 
     this.controlKey = false
@@ -354,6 +362,22 @@ export default class PPlainDateInput extends Vue {
   private monthWith31Days = (month: number): boolean =>
       [1, 3, 5, 7, 8, 10, 12].includes(month)
 
+
+  private logState() {
+    this.log(`
+      endOfElement  ${this.endOfElement}
+      inDate        ${this.inDate}
+      dayInput      ${this.dayInput}
+      monthInput    ${this.monthInput}
+      yearInput     ${this.yearInput}
+      showError     ${this.showError}
+      virtualValue  ${this.virtualValue}
+      fieldComplete ${this.fieldComplete}
+      controlKey    ${this.controlKey}
+
+
+    `)
+  }
 
   private isValidDay(day?: number, month?: number, year?: number): boolean {
     if (!day) {
@@ -479,7 +503,8 @@ export default class PPlainDateInput extends Vue {
     if (this.endOfElement) {
       element.value = this.virtualValue
     }
-    this.focusNextElement(event.currentTarget as HTMLInputElement)
+
+    this.focusNextElement(event)
   }
 
   private nextInputElement(
@@ -534,11 +559,14 @@ export default class PPlainDateInput extends Vue {
     return this.day != undefined && this.day > 0 && this.month != undefined && this.month > 0 && this.year != undefined && this.year > 0
   }
 
-  private focusNextElement(element: HTMLInputElement): void {
+  private focusNextElement(event: KeyboardEvent): void {
+    const element = event.currentTarget as HTMLInputElement
     const nextElement = this.nextInputElement(element, true)
     this.fieldComplete = this.isComplete(element)
-    if (nextElement && this.fieldComplete) {
-      nextElement.focus()
+    if (nextElement) {
+      if (this.fieldComplete) {
+        nextElement.focus()
+      }
     }
   }
 
@@ -647,9 +675,7 @@ export default class PPlainDateInput extends Vue {
       this.monthInput = month.padStart(2, '0')
       this.yearInput  = year.padStart(4, '0')
 
-      dayInputElm.blur()
-      monthInputElm.blur()
-      yearInputElm.blur()
+      this.updateValue()
 
     }
   }
@@ -678,28 +704,36 @@ export default class PPlainDateInput extends Vue {
   }
 
 
-  private nextField(event: KeyboardEvent) {
+  private nextField(event: KeyboardEvent): boolean {
     const element = event.target as HTMLInputElement
+    let next = false
     if (this.endOfField(element)) {
       event.preventDefault()
       const nextElement = this.nextInputElement(element, true)
       if (nextElement) {
+        next = true
         nextElement.focus()
         nextElement.setSelectionRange(0, 0)
       }
     }
+
+    return next
   }
 
-  private previousField(event: KeyboardEvent) {
+  private previousField(event: KeyboardEvent): boolean {
     const element = event.target as HTMLInputElement
+    let next = false
     if (this.startOfField(element)) {
       const nextElement = this.nextInputElement(element, false)
       if (nextElement) {
+        next = true
         event.preventDefault()
         nextElement.focus()
         nextElement.setSelectionRange(nextElement.maxLength, nextElement.maxLength)
       }
     }
+
+    return next
   }
 }
 </script>
@@ -790,6 +824,9 @@ input:focus {
   margin-left: 3px;
 }
 
+.__pdate_input__divider {
+  pointer-events: none;
+}
 .__pdateinput_error {
   border-color: red;
 }
