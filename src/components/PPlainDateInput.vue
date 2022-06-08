@@ -375,8 +375,14 @@ export default class PPlainDateInput extends Vue {
       if (day === 31 && this.monthWith31Days(month)) {
         return true
       }
-      if (day === 29 && month === 2 && this.isLeapYear(year)) {
-        return true
+      if (month === 2) {
+        if (year) {
+          if (this.isLeapYear(year)) {
+            return day < 30
+          } else {
+            return day < 29
+          }
+        }
       }
 
       return day < 30
